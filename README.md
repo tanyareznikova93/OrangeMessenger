@@ -4,8 +4,6 @@ Android chat app
 
 1) создать группу/create group
 - частично реализовано/partially implemented
-- добавить отправку всех типов файлов и фото/add sending of all types of files and photos
-- добавить отправку голосового сообщения/add sending voice messages
 - добавить имя пользователя в чате и фото профиля/add username and photo in group chats
 
 2) создать канал/create channel
