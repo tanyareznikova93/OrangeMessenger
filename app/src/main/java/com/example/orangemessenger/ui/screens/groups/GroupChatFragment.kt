@@ -94,7 +94,7 @@ class GroupChatFragment(private val group: CommonModel) : BaseFragment(R.layout.
                         group_chat_input_message_et.setText("")
                         group_chat_btn_voice_iv.setColorFilter(null)
                         mAppVoiceRecorder.stopRecord(){file,messageKey ->
-                            uploadFileToStorage(
+                            uploadFileToStorageForGroup(
                                 Uri.fromFile(file),
                                 messageKey,
                                 group.id,
@@ -237,14 +237,14 @@ class GroupChatFragment(private val group: CommonModel) : BaseFragment(R.layout.
                 CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE -> {
                     val uri = CropImage.getActivityResult(data).uri
                     val messageKey = getMessageKey(group.id)
-                    uploadFileToStorage(uri, messageKey, group.id, TYPE_MESSAGE_IMAGE)
+                    uploadFileToStorageForGroup(uri, messageKey, group.id, TYPE_MESSAGE_IMAGE)
                     mSmoothScrollToPosition = true
                 }
                 PICK_FILE_REQUEST_CODE -> {
                     val uri = data.data
                     val messageKey = getMessageKey(group.id)
                     val filename = getFilenameFromUri(uri!!)
-                    uploadFileToStorage(uri,messageKey,group.id, TYPE_MESSAGE_FILE,filename)
+                    uploadFileToStorageForGroup(uri,messageKey,group.id, TYPE_MESSAGE_FILE,filename)
                     mSmoothScrollToPosition = true
                 }
 
@@ -267,16 +267,16 @@ class GroupChatFragment(private val group: CommonModel) : BaseFragment(R.layout.
     }//onDestroy
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        activity?.menuInflater?.inflate(R.menu.single_chat_action_menu, menu)
+        activity?.menuInflater?.inflate(R.menu.group_chat_action_menu, menu)
     }//onCreateOptionsMenu
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
-            R.id.menu_clear_chat -> clearChat(group.id){
+            R.id.group_menu_clear_chat -> clearChatInGroup(group.id){
                 showToast("Чат очищен")
                 replaceFragment(MainListFragment())
             }
-            R.id.menu_delete_chat -> deleteChat(group.id){
+            R.id.group_menu_delete_chat -> deleteChat(group.id){
                 showToast("Чат удален")
                 replaceFragment(MainListFragment())
             }

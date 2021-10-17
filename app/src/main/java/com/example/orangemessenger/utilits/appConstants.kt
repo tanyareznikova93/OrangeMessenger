@@ -14,3 +14,4 @@ const val TYPE_GROUP = "group"
 const val TYPE_CHANNEL = "channel"
 
 const val PICK_FILE_REQUEST_CODE = 301
+//const val PICK_FILE_REQUEST_CODE_FOR_GROUP = 302

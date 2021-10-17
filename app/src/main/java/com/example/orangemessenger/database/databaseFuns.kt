@@ -264,6 +264,7 @@ fun clearChat(id: String, function: () -> Unit) {
 
 }//clearChat
 
+//создает группы в БД
 fun createGroupInDatabase(
     groupName: String,
     uri: Uri,
@@ -313,6 +314,7 @@ fun createGroupInDatabase(
 
 }//createGroupInDatabase
 
+//выводит группы на главной странице приложения
 fun addGroupsToMainList(
     mapData: HashMap<String, Any>,
     listContacts: List<CommonModel>,
@@ -333,6 +335,7 @@ fun addGroupsToMainList(
 
 }//addGroupsToMainList
 
+//отправляет текстовое сообщение в группу
 fun sendMessageToGroup(message: String, groupID: String, typeText: String, function: () -> Unit) {
 
     val refMessages = "$NODE_GROUPS/$groupID/$NODE_MESSAGES"
@@ -351,3 +354,68 @@ fun sendMessageToGroup(message: String, groupID: String, typeText: String, funct
         .addOnFailureListener { showToast(it.message.toString()) }
 
 }//sendMessageToGroup
+
+//отправляет файл в группу
+fun sendMessageAsFileToGroup(
+    groupID: String,
+    fileUrl: String,
+    messageKey: String,
+    typeMessage: String,
+    filename: String
+) {
+
+    val refMessages = "$NODE_GROUPS/$groupID/$NODE_MESSAGES"
+
+    //val refDialogUser = "$NODE_GROUPS/$CURRENT_UID/$receivingUserID"
+    //val refDialogReceivingUser = "$NODE_MESSAGES/$receivingUserID/$CURRENT_UID"
+
+    val mapMessage = hashMapOf<String,Any>()
+    mapMessage[CHILD_FROM] = CURRENT_UID
+    mapMessage[CHILD_TYPE] = typeMessage
+    mapMessage[CHILD_ID] = messageKey
+    mapMessage[CHILD_TIMESTAMP] = ServerValue.TIMESTAMP
+    mapMessage[CHILD_FILE_URL] = fileUrl
+    mapMessage[CHILD_TEXT] = filename
+
+    val mapDialog = hashMapOf<String,Any>()
+    mapDialog["$refMessages/$messageKey"] = mapMessage
+
+    REF_DATABASE_ROOT
+        .updateChildren(mapDialog)
+        .addOnFailureListener { showToast(it.message.toString()) }
+
+}//sendMessageAsFileToGroup
+
+//отправляет файл в storage
+fun uploadFileToStorageForGroup(
+    uri: Uri,
+    messageKey: String,
+    groupID: String,
+    typeMessage: String,
+    filename: String = ""
+) {
+
+    val path = REF_STORAGE_ROOT.child(FOLDER_FILES)
+        .child(messageKey)
+    putFileToStorage(uri, path) {
+        getUrlFromStorage(path) {
+            sendMessageAsFileToGroup(groupID, it, messageKey, typeMessage,filename)
+        }//getUrlFromStorage
+    }//putFileToStorage
+
+}//uploadFileToStorageForGroup
+
+//Очищает группу от сообщений
+fun clearChatInGroup(id: String, function: () -> Unit) {
+
+    REF_DATABASE_ROOT.child(NODE_GROUPS).child(id).child(NODE_MESSAGES)
+        .removeValue()
+        .addOnFailureListener { showToast(it.message.toString()) }
+        .addOnSuccessListener {
+            REF_DATABASE_ROOT.child(NODE_GROUPS).child(id).child(NODE_MESSAGES)
+                .removeValue()
+                .addOnSuccessListener { function() }
+                .addOnFailureListener { showToast(it.message.toString()) }
+        }
+
+}//clearChatInGroup
